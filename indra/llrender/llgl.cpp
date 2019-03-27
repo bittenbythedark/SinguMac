@@ -272,10 +272,6 @@ PFNGLGETQUERYOBJECTIVARBPROC glGetQueryObjectivARB = NULL;
 PFNGLGETQUERYOBJECTUIVARBPROC glGetQueryObjectuivARB = NULL;
 PFNGLGETQUERYOBJECTUI64VEXTPROC glGetQueryObjectui64vEXT = NULL;
 
-// GL_ARB_point_parameters
-PFNGLPOINTPARAMETERFARBPROC glPointParameterfARB = NULL;
-PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB = NULL;
-
 // GL_ARB_framebuffer_object
 PFNGLISRENDERBUFFERPROC glIsRenderbuffer = NULL;
 PFNGLBINDRENDERBUFFERPROC glBindRenderbuffer = NULL;
@@ -461,7 +457,6 @@ LLGLManager::LLGLManager() :
 	mNumTextureImageUnits(0),
 	mHasOcclusionQuery(FALSE),
 	mHasOcclusionQuery2(FALSE),
-	mHasPointParameters(FALSE),
 	mHasDrawBuffers(FALSE),
 	mHasTransformFeedback(FALSE),
 	mMaxIntegerSamples(0),
@@ -992,7 +987,6 @@ void LLGLManager::initExtensions()
 	mHasAnisotropic = FALSE;
 	mHasCubeMap = FALSE;
 	mHasOcclusionQuery = FALSE;
-	mHasPointParameters = FALSE;
 	mHasShaderObjects = FALSE;
 	mHasVertexShader = FALSE;
 	mHasFragmentShader = FALSE;
@@ -1032,18 +1026,14 @@ void LLGLManager::initExtensions()
 	mHasBlendFuncSeparate = mGLVersion >= 1.4f || ExtensionExists("GL_EXT_blend_func_separate");
 	mHasDebugOutput = mGLVersion >= 4.3f || ExtensionExists("GL_ARB_debug_output");
 	mHasTransformFeedback = mGLVersion >= 4.f || ExtensionExists("GL_EXT_transform_feedback");
-#if !LL_DARWIN
-	mHasPointParameters = mGLVersion >= 2.f || (!mIsATI && ExtensionExists("GL_ARB_point_parameters"));
-#endif
-#if defined(LL_GL_CORE)
+
 	mHasShaderObjects = mHasVertexShader = mHasFragmentShader = true;
-#else
+
 	mHasShaderObjects = mGLVersion >= 2.f || ExtensionExists("GL_ARB_shader_objects") && (LLRender::sGLCoreProfile || ExtensionExists("GL_ARB_shading_language_100"));
 	mHasVertexShader = mGLVersion >= 2.f || (ExtensionExists("GL_ARB_vertex_program") && ExtensionExists("GL_ARB_vertex_shader")
 		&& (LLRender::sGLCoreProfile || ExtensionExists("GL_ARB_shading_language_100")));
 	mHasFragmentShader = mGLVersion >= 2.f || ExtensionExists("GL_ARB_fragment_shader") && (LLRender::sGLCoreProfile || ExtensionExists("GL_ARB_shading_language_100"));
-#endif
-#endif
+
 #ifdef GL_ARB_gpu_shader5
 	mHasGpuShader5 = mGLVersion >= 4.f || ExtensionExists("GL_ARB_gpu_shader5");;
 #endif
@@ -1051,6 +1041,7 @@ void LLGLManager::initExtensions()
 	mHasAdaptiveVsync = ExtensionExists("WGL_EXT_swap_control_tear");
 #elif LL_LINUX
 	mHasAdaptiveVsync = ExtensionExists("GLX_EXT_swap_control_tear");
+#endif
 #endif
 
 #ifdef GL_ARB_texture_swizzle
@@ -1076,7 +1067,6 @@ void LLGLManager::initExtensions()
 		mHasAnisotropic = FALSE;
 		mHasCubeMap = FALSE;
 		mHasOcclusionQuery = FALSE;
-		mHasPointParameters = FALSE;
 		mHasShaderObjects = FALSE;
 		mHasVertexShader = FALSE;
 		mHasFragmentShader = FALSE;
@@ -1120,7 +1110,6 @@ void LLGLManager::initExtensions()
 		if (strchr(blacklist,'m')) mHasShaderObjects = FALSE;//S
 		if (strchr(blacklist,'n')) mHasVertexShader = FALSE;//S
 		if (strchr(blacklist,'o')) mHasFragmentShader = FALSE;//S
-		if (strchr(blacklist,'p')) mHasPointParameters = FALSE;//S
 		if (strchr(blacklist,'q')) mHasFramebufferObject = FALSE;//S
 		if (strchr(blacklist,'r')) mHasDrawBuffers = FALSE;//S
 		if (strchr(blacklist,'s')) mHasFramebufferMultisample = FALSE;
@@ -1157,10 +1146,6 @@ void LLGLManager::initExtensions()
 	if (!mHasOcclusionQuery2)
 	{
 		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_occlusion_query2" << LL_ENDL;
-	}
-	if (!mHasPointParameters)
-	{
-		LL_INFOS("RenderInit") << "Couldn't initialize GL_ARB_point_parameters" << LL_ENDL;
 	}
 	if (!mHasShaderObjects)
 	{
@@ -1368,15 +1353,7 @@ void LLGLManager::initExtensions()
 		glGetQueryObjectivARB = (PFNGLGETQUERYOBJECTIVARBPROC)GLH_EXT_GET_PROC_ADDRESS_CORE(1.4, "glGetQueryObjectiv");
 		glGetQueryObjectuivARB = (PFNGLGETQUERYOBJECTUIVARBPROC)GLH_EXT_GET_PROC_ADDRESS_CORE(1.4, "glGetQueryObjectuiv");
 	}
-#if !LL_DARWIN
-	glGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLH_EXT_GET_PROC_ADDRESS_CORE_EXT(3.2, "glGetQueryObjectui64v");
-#endif
-	if (mHasPointParameters)
-	{
-		LL_INFOS() << "initExtensions() PointParameters-related procs..." << LL_ENDL;
-		glPointParameterfARB = (PFNGLPOINTPARAMETERFARBPROC) GLH_EXT_GET_PROC_ADDRESS_CORE(2.0, "glPointParameterf");
-		glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC) GLH_EXT_GET_PROC_ADDRESS_CORE(2.0, "glPointParameterfv");
-	}
+glGetQueryObjectui64vEXT = (PFNGLGETQUERYOBJECTUI64VEXTPROC)GLH_EXT_GET_PROC_ADDRESS_CORE_EXT(3.3, "glGetQueryObjectui64v");
 	if (mHasShaderObjects)
 	{
 		glDeleteShader = (PFNGLDELETEOBJECTARBPROC) GLH_EXT_GET_PROC_ADDRESS_CORE_OR_ARB(2.0, "glDeleteShader", "glDeleteObjectARB");

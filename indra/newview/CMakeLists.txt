@@ -1619,7 +1619,6 @@ if (WINDOWS)
         --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}
         --grid=${GRID}
         --sdl2=${LLWINDOW_SDL2}
-        --channel=${VIEWER_CHANNEL}
         --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
         --source=${CMAKE_CURRENT_SOURCE_DIR}
         --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/copy_touched.bat
@@ -1850,11 +1849,11 @@ endif (LINUX)
 
 if (DARWIN)
   # These all get set with PROPERTIES
-  set(MACOSX_BUNDLE_INFO_STRING "${VIEWER_CHANNEL}")
+  set(MACOSX_BUNDLE_INFO_STRING "${VIEWER_CHANNEL_ONEWORD}")
   set(MACOSX_BUNDLE_ICON_FILE "viewer.icns")
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VIEWER_CHANNEL}")
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER "${VIEWER_CHANNEL_ONEWORD}")
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${VIEWER_CHANNEL} ${VIEWER_SHORT_VERSION}.${VIEWER_VERSION_REVISION}")
-  set(MACOSX_BUNDLE_BUNDLE_NAME "${VIEWER_CHANNEL}")
+  set(MACOSX_BUNDLE_BUNDLE_NAME "${VIEWER_CHANNEL_ONEWORD}")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${VIEWER_SHORT_VERSION}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${${ROOT_PROJECT_NAME}_VERSION}")
   set(MACOSX_BUNDLE_COPYRIGHT "Copyright 2010-2019 Siana Gearz")
@@ -1865,14 +1864,14 @@ if (DARWIN)
     ${VIEWER_BINARY_NAME}
     PROPERTIES
     RESOURCE "${viewer_RESOURCE_FILES}"
-    OUTPUT_NAME "${VIEWER_CHANNEL}"
+    OUTPUT_NAME "${VIEWER_CHANNEL_ONEWORD}"
     MACOSX_BUNDLE_INFO_PLIST
     "${CMAKE_CURRENT_SOURCE_DIR}/Info-Singularity.plist"
     )
 
   configure_file(
      "${CMAKE_CURRENT_SOURCE_DIR}/Info-Singularity.plist"
-     "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL}.app/Contents/Info.plist"
+     "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL_ONEWORD}.app/Contents/Info.plist"
     )
 
   add_dependencies(${VIEWER_BINARY_NAME} generate_viewer_version)
@@ -1888,10 +1887,10 @@ if (DARWIN)
       --branding_id=${VIEWER_BRANDING_ID}
       --build=${CMAKE_CURRENT_BINARY_DIR}
       --buildtype=${CMAKE_BUILD_TYPE}
-      --configuration=${CMAKE_CFG_INTDIR}
-      --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL}.app
-      --grid=${GRID}
       --channel=${VIEWER_CHANNEL}
+      --configuration=${CMAKE_CFG_INTDIR}
+      --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL_ONEWORD}.app
+      --grid=${GRID}
       --sdl2=${LLWINDOW_SDL2}
       --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
       --bundleid=${MACOSX_BUNDLE_GUI_IDENTIFIER}
@@ -1924,10 +1923,9 @@ if (DARWIN)
           --buildtype=${CMAKE_BUILD_TYPE}
           --channel=${VIEWER_CHANNEL}
           --configuration=${CMAKE_CFG_INTDIR}
-          --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL}.app
+          --dest=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/${VIEWER_CHANNEL_ONEWORD}.app
           --grid=${GRID}
           --sdl2=${LLWINDOW_SDL2}
-          --channel=${VIEWER_CHANNEL}
           --versionfile=${CMAKE_CURRENT_BINARY_DIR}/viewer_version.txt
           --source=${CMAKE_CURRENT_SOURCE_DIR}
           --touch=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/.${VIEWER_CHANNEL_NOSPACE}.touched
@@ -1964,7 +1962,7 @@ if (PACKAGE)
     list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/mac_crash_logger/${CMAKE_CFG_INTDIR}")
     list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_BINARY_DIR}/media_plugins/gstreamer010/${CMAKE_CFG_INTDIR}")
     set(VIEWER_SYMBOL_FILE "${SYMBOL_NAME}-darwin.tar.bz2")
-    set(VIEWER_EXE_GLOBS "'${VIEWER_CHANNEL}' AlchemyPlugin mac-crash-logger")
+    set(VIEWER_EXE_GLOBS "'${VIEWER_CHANNEL_ONEWORD}' AlchemyPlugin mac-crash-logger")
     set(VIEWER_LIB_GLOB "*.dylib")
   endif (DARWIN)
   if (LINUX)

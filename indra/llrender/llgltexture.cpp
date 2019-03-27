@@ -394,3 +394,4 @@ void LLGLTexture::setTexelsPerImage()
 	S32 fullheight = llmin(mFullHeight,(S32)MAX_IMAGE_SIZE_DEFAULT);
 	mTexelsPerImage = (F32)fullwidth * fullheight;
 }
+

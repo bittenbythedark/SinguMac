@@ -760,7 +760,6 @@ void gl_stippled_line_3d( const LLVector3& start, const LLVector3& end, const LL
 {
 	phase = fmod(phase, 1.f);
 
-	S32 shift = S32(phase * 4.f) % 4;
 
 	// Stippled line
 #ifndef LL_GL_CORE

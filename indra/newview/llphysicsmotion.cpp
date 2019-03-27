@@ -121,6 +121,8 @@ public:
         }
 
         BOOL initialize();
+    void getString(std::ostringstream &oss);
+    
 
         ~LLPhysicsMotion() {}
 
@@ -130,6 +132,7 @@ public:
         {
                 return mJointState;
         }
+    void reset();
 protected:
 
 		F32 getParamValue(eParamName param)
@@ -232,10 +235,84 @@ BOOL LLPhysicsMotion::initialize()
 
         return TRUE;
 }
+std::string LLPhysicsMotionController::getString()
+{
+    std::ostringstream oss;
+    oss << "{" << std::endl <<
+    "Active: " << mActive << std::endl <<
+    "IsDefault: " << mIsDefault << std::endl <<
+    "Stopped: " << isStopped() << std::endl <<
+    "Name: " << getName() << std::endl <<
+    "ID: " << getID().asString() << std::endl;
+    
+    for (motion_vec_t::iterator iter = mMotions.begin();iter != mMotions.end();++iter)
+    {
+        (*iter)->getString(oss);
+    }
+    oss << "}" << std::endl;
+    return oss.str();
+}
+void getParamString(U32 depth, LLViewerVisualParam *param, std::ostringstream &oss)
+{
+    std::string indent;
+    indent.resize(depth,' ');
+    
+    oss <<
+    indent << "getID: " << param->getID() << std::endl <<
+    indent << "getName: " << param->getName() << std::endl <<
+    indent << "getDisplayName: " << param->getDisplayName() << std::endl <<
+    indent << "getGroup: " << param->getGroup() << std::endl <<
+    indent << "getSex: " << param->getSex() << std::endl <<
+    indent << "getMinWeight: " << param->getMinWeight() << std::endl <<
+    indent << "getMaxWeight: " << param->getMaxWeight() << std::endl <<
+    indent << "getDefaultWeight: " << param->getDefaultWeight() << std::endl <<
+    indent << "getWeight: " << param->getWeight() << std::endl <<
+    indent << "getCurrentWeight: " << param->getCurrentWeight() << std::endl <<
+    indent << "getLastWeight: " << param->getLastWeight() << std::endl <<
+    indent << "isAnimating: " << param->isAnimating() << std::endl <<
+    indent << "isTweakable: " << param->isTweakable() << std::endl;
+}
 
-LLPhysicsMotionController::LLPhysicsMotionController(const LLUUID &id) : 
-        LLMotion(id),
-        mCharacter(nullptr)
+void LLPhysicsMotion::getString(std::ostringstream &oss)
+{
+    oss <<
+    " mParamDriverName: " << mParamDriverName << std::endl <<
+    " mParamControllerName: " << mParamControllerName << std::endl <<
+    " mMotionDirectionVec: " << mMotionDirectionVec << std::endl <<
+    " mJointName: " << mJointName << std::endl <<
+    " mPosition_local: " << mPosition_local << std::endl <<
+    " mVelocityJoint_local: " << mVelocityJoint_local << std::endl <<
+    " mAccelerationJoint_local: " << mAccelerationJoint_local << std::endl <<
+    " mPositionLastUpdate_local: " << mPositionLastUpdate_local << std::endl <<
+    " mPosition_world: " << mPosition_world << std::endl <<
+    " mVelocity_local: " << mVelocity_local << std::endl;
+    if(mParamDriver)
+    {
+        oss << " <DRIVER>" << std::endl;
+        getParamString(2,mParamDriver,oss);
+        LLDriverParam *driver_param = dynamic_cast<LLDriverParam *>(mParamDriver);
+        if(driver_param)
+        {
+            for (LLDriverParam::entry_list_t::iterator iter = driver_param->getDrivenList().begin();
+                 iter != driver_param->getDrivenList().end();++iter)
+            {
+                oss << "  <DRIVEN>" << std::endl;
+                getParamString(3,iter->mParam,oss);
+            }
+        }
+    }
+    else
+        oss << " mParamDriver: (NULL)" << std::endl;
+    oss << " Controllers:" << std::endl;
+    for(controller_map_t::const_iterator it = mParamControllers.begin(); it!= mParamControllers.end(); ++it)
+    {
+        oss << "  mParamControllers[\"" << it->first << "\"] = \"" << it->second << "\" =" << mCharacter->getVisualParamWeight(it->first.c_str()) << std::endl;
+    }
+}
+LLPhysicsMotionController::LLPhysicsMotionController(const LLUUID &id) :
+LLMotion(id),
+mCharacter(nullptr),
+mIsDefault(true)
 {
         mName = "breast_motion";
 }
@@ -453,13 +530,25 @@ F32 LLPhysicsMotion::calculateAcceleration_local(const F32 velocity_local, const
 
 BOOL LLPhysicsMotionController::onUpdate(F32 time, U8* joint_mask)
 {
+    
         // Skip if disabled globally.
-		static LLCachedControl<bool> avatar_physics(gSavedSettings, "AvatarPhysics");
-		if (!avatar_physics)
+static const LLCachedControl<bool> avatar_physics("AvatarPhysics",false);
+    bool skip_physics = !avatar_physics || (!((LLVOAvatar*)mCharacter)->isSelf() && !((LLVOAvatar*)mCharacter)->mHasPhysicsParameters);
+    if (skip_physics || !LLVOAvatar::sPhysicsLODFactor)
+{
+    if(!mIsDefault)
+    {
+        mIsDefault = true;
+        for (motion_vec_t::iterator iter = mMotions.begin();iter != mMotions.end();++iter)
         {
-                return TRUE;
+            (*iter)->reset();
         }
-        
+        mCharacter->updateVisualParams();
+    }
+    return TRUE;
+}
+
+mIsDefault = false;
         BOOL update_visuals = FALSE;
         for (motion_vec_t::iterator iter = mMotions.begin();
              iter != mMotions.end();
@@ -474,7 +563,23 @@ BOOL LLPhysicsMotionController::onUpdate(F32 time, U8* joint_mask)
         
         return TRUE;
 }
-
+void LLPhysicsMotion::reset()
+{
+    LLDriverParam *driver_param = dynamic_cast<LLDriverParam *>(mParamDriver);
+    if (driver_param)
+    {
+        if ((driver_param->getGroup() != VISUAL_PARAM_GROUP_TWEAKABLE) &&
+            (driver_param->getGroup() != VISUAL_PARAM_GROUP_TWEAKABLE_NO_TRANSMIT))
+        {
+            mCharacter->setVisualParamWeight(driver_param,driver_param->getDefaultWeight());
+        }
+        for (LLDriverParam::entry_list_t::iterator iter = driver_param->getDrivenList().begin();
+             iter != driver_param->getDrivenList().end();++iter)
+        {
+            mCharacter->setVisualParamWeight((*iter).mParam,(*iter).mParam->getDefaultWeight());
+        }
+    }
+} 
 // Return TRUE if character has to update visual params.
 BOOL LLPhysicsMotion::onUpdate(F32 time)
 {

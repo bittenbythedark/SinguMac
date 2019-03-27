@@ -34,10 +34,6 @@
 #include "llcontrol.h"	//for LLCachedControl
 #include "lldir.h"		//for gDirUtilp
 
-#if LL_DARWIN
-#include "OpenGL/OpenGL.h"
-#endif
-
 #ifdef LL_RELEASE_FOR_DOWNLOAD
 #define UNIFORM_ERRS LL_WARNS_ONCE("Shader")
 #else

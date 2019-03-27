@@ -33,14 +33,7 @@
 #include "llrender.h"
 #include "llcontrol.h"
 #include "llvertexbuffer.h"
-
-#if LL_DARWIN
-#include "OpenGL/OpenGL.h"
-#include <OpenGL/gl.h> //OS x libs
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#endif
-
+#include "llglheaders.h"
 #ifdef LL_RELEASE_FOR_DOWNLOAD
 #define UNIFORM_ERRS LL_WARNS_ONCE("Shader")
 #else
@@ -233,8 +226,8 @@ void LLGLSLShader::placeProfileQuery()
 {
     if (mTimerQuery == 0)
     {
-        glGenQueriesARB(1, &mSamplesQuery);
-        glGenQueriesARB(1, &mTimerQuery);
+        glGenQueries(1, &mSamplesQuery);
+        glGenQueries(1, &mTimerQuery);
     }
 
     if (!mTextureStateFetched)
@@ -393,12 +386,8 @@ BOOL LLGLSLShader::createShader(std::vector<LLStaticHashedString> * attributes,
 	if(mProgramObject)	//purge the old program
 		glDeleteProgram(mProgramObject);
 	// Create program
-	mProgramObject = glCreateProgramObjectARB();
+	mProgramObject = glCreateProgram();
 	
-#if LL_DARWIN
-    // work-around missing mix(vec3,vec3,bvec3)
-    mDefines["OLD_SELECT"] = "1";
-#endif
 	
 	//compile new source
 	vector< pair<string,GLenum> >::iterator fileIter = mShaderFiles.begin();
@@ -555,7 +544,7 @@ BOOL LLGLSLShader::mapAttributes(const std::vector<LLStaticHashedString> * attri
 		for (U32 i = 0; i < (S32) LLShaderMgr::instance()->mReservedAttribs.size(); i++)
 		{
 			const char* name = LLShaderMgr::instance()->mReservedAttribs[i].c_str();
-			S32 index = glGetAttribLocationARB(mProgramObject, (const GLcharARB *)name);
+			S32 index = glGetAttribLocation(mProgramObject, (const GLcharARB *)name);
 			if (index != -1)
 			{
 				mAttribute[i] = index;
@@ -568,7 +557,7 @@ BOOL LLGLSLShader::mapAttributes(const std::vector<LLStaticHashedString> * attri
 			for (U32 i = 0; i < numAttributes; i++)
 			{
 				const char* name = (*attributes)[i].String().c_str();
-				S32 index = glGetAttribLocationARB(mProgramObject, name);
+				S32 index = glGetAttribLocation(mProgramObject, name);
 				if (index != -1)
 				{
 					mAttribute[LLShaderMgr::instance()->mReservedAttribs.size() + i] = index;
@@ -587,7 +576,6 @@ void LLGLSLShader::mapUniform(const gl_uniform_data_t& gl_uniform, const vector<
 {
 	GLint size = gl_uniform.size;
 	char* name = (char*)gl_uniform.name.c_str(); //blegh
-#if !LL_DARWIN
 	if (size > 0)
 	{
 		switch(gl_uniform.type)
@@ -629,7 +617,6 @@ void LLGLSLShader::mapUniform(const gl_uniform_data_t& gl_uniform, const vector<
 		}
 		mTotalUniformSize += size;
 	}
-#endif
 
 	S32 location = glGetUniformLocationARB(mProgramObject, name);
 	if (location != -1)
@@ -700,7 +687,7 @@ void LLGLSLShader::removePermutation(std::string name)
 
 GLint LLGLSLShader::mapUniformTextureChannel(GLint location, GLenum type)
 {
-	if (type >= GL_SAMPLER_1D_ARB && type <= GL_SAMPLER_2D_RECT_SHADOW_ARB /*||
+	if (type >= GL_SAMPLER_1D && type <= GL_SAMPLER_2D_RECT_SHADOW /*||
 		type == GL_SAMPLER_2D_MULTISAMPLE*/)
 	{	//this here is a texture
 		gGL.syncShaders();

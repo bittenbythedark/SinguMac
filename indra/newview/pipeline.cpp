@@ -117,7 +117,7 @@
 
 void check_stack_depth(S32 stack_depth)
 {
-#ifndef LL_GL_CORE
+//#ifndef LL_GL_CORE
 	if (gDebugGL || gDebugSession)
 	{
 		GLint depth;
@@ -134,7 +134,7 @@ void check_stack_depth(S32 stack_depth)
 			}
 		}
 	}
-#endif
+//#endif
 }
 
 #ifdef _DEBUG
@@ -1213,11 +1213,6 @@ void LLPipeline::createLUTBuffers()
 			}
 			
 			U32 pix_format = GL_R16F;
-#if LL_DARWIN
-			// Need to work around limited precision with 10.6.8 and older drivers
-			//
-			pix_format = GL_R32F;
-#endif
 			mLightFunc = LLImageGL::createTextureName();
 			gGL.getTexUnit(0)->bindManual(LLTexUnit::TT_TEXTURE, mLightFunc->getTexName());
 			LLImageGL::setManualImage(LLTexUnit::getInternalType(LLTexUnit::TT_TEXTURE), 0, pix_format, lightResX, lightResY, GL_RED, GL_FLOAT, ls);
@@ -4105,9 +4100,9 @@ void LLPipeline::renderGeom(LLCamera& camera, BOOL forceVBOUpdate)
 
 	// Set fog only if not using shaders and is underwater render.
 	BOOL use_fog = hasRenderDebugFeatureMask(LLPipeline::RENDER_DEBUG_FEATURE_FOG);
-#ifndef LL_GL_CORE
+//#ifndef LL_GL_CORE
 	LLGLEnable<GL_FOG_LEGACY> fog_enable(use_fog && sUnderWaterRender && !LLGLSLShader::sNoFixedFunction);
-#endif
+//#endif
 	gSky.updateFog(camera.getFar());
 
 	gGL.getTexUnit(0)->bind(LLViewerFetchedTexture::sDefaultImagep);
@@ -5730,13 +5725,13 @@ void LLPipeline::setupHWLights()
 		LLColor4 ambient = PreviewAmbientColor;
 		gGL.setAmbientLightColor(ambient);
 	}
-#ifndef LL_GL_CORE
+//#ifndef LL_GL_CORE
 	else if (!LLGLSLShader::sNoFixedFunction)
 	{
 		LLColor4 ambient = gSky.getTotalAmbientColor();
 		gGL.setAmbientLightColor(ambient);
 	}
-#endif
+//#endif
 
 	U8 cur_light = 0;
 	// Light 0 = Sun or Moon (All objects)
@@ -6761,7 +6756,7 @@ void validate_framebuffer_object()
 			// frame buffer not OK: probably means unsupported depth buffer format
 			LL_ERRS() << "Framebuffer Incomplete Dimensions." << LL_ENDL;
 			break;
-		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
 			// frame buffer not OK: probably means unsupported depth buffer format
 			LL_ERRS() << "Framebuffer Incomplete Attachment." << LL_ENDL;
 			break; 
@@ -7316,7 +7311,7 @@ void LLPipeline::renderBloom(BOOL for_snapshot, F32 zoom_factor, int subfield, b
 		{
 			gGlowCombineProgram.bind();
 		}
-#ifndef LL_GL_CORE
+//#ifndef LL_GL_CORE
 		else
 		{
 			//tex unit 0
@@ -7324,7 +7319,7 @@ void LLPipeline::renderBloom(BOOL for_snapshot, F32 zoom_factor, int subfield, b
 			//tex unit 1
 			gGL.getTexUnit(1)->setTextureColorBlend(LLTexUnit::TBO_ADD, LLTexUnit::TBS_TEX_COLOR, LLTexUnit::TBS_PREV_COLOR);
 		}
-#endif
+//#endif
 		
 		gGL.getTexUnit(0)->bind(&mGlow[1]);
 		gGL.getTexUnit(1)->bind(&mScreen);
@@ -7337,7 +7332,7 @@ void LLPipeline::renderBloom(BOOL for_snapshot, F32 zoom_factor, int subfield, b
 		{
 			gGlowCombineProgram.unbind();
 		}
-#ifndef LL_GL_CORE
+//#ifndef LL_GL_CORE
 		else
 		{
 			gGL.getTexUnit(1)->disable();
@@ -7346,7 +7341,7 @@ void LLPipeline::renderBloom(BOOL for_snapshot, F32 zoom_factor, int subfield, b
 			gGL.getTexUnit(0)->activate();
 			gGL.getTexUnit(0)->setTextureBlendType(LLTexUnit::TB_MULT);
 		}
-#endif
+//#endif
 		
 	}
 

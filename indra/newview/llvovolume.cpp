@@ -4986,10 +4986,10 @@ void LLVolumeGeometryManager::registerFace(LLSpatialGroup* group, LLFace* facep,
 		draw_vec[idx]->mVertexBuffer == facep->getVertexBuffer() &&
 		draw_vec[idx]->mEnd == facep->getGeomIndex()-1 &&
 		(LLPipeline::sTextureBindTest || draw_vec[idx]->mTexture == tex || batchable) &&
-#if LL_DARWIN
+//#if LL_DARWIN
 		draw_vec[idx]->mEnd - draw_vec[idx]->mStart + facep->getGeomCount() <= (U32) gGLManager.mGLMaxVertexRange &&
 		draw_vec[idx]->mCount + facep->getIndicesCount() <= (U32) gGLManager.mGLMaxIndexRange &&
-#endif
+//#endif
 		(!cmp_mat || draw_vec[idx]->mMaterial == mat) &&
 		//draw_vec[idx]->mMaterialID == mat_id &&
 		(!cmp_fullbright || draw_vec[idx]->mFullbright == fullbright) &&
@@ -6254,7 +6254,7 @@ void LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFac
 
 	U32 buffer_usage = group->mBufferUsage;
 	
-#if LL_DARWIN
+/*#if LL_DARWIN
 	// HACK from Leslie:
 	// Disable VBO usage for alpha on Mac OS X because it kills the framerate
 	// due to implicit calls to glTexSubImage that are beyond our control.
@@ -6263,7 +6263,7 @@ void LLVolumeGeometryManager::genDrawInfo(LLSpatialGroup* group, U32 mask, LLFac
 	{
 		buffer_usage = 0x0;
 	}
-#endif
+#endif*/
 
 	//calculate maximum number of vertices to store in a single buffer
 	static const LLCachedControl<S32> max_vbo_size("RenderMaxVBOSize", 512);

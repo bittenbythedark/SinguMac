@@ -202,10 +202,6 @@ extern PFNGLGETQUERYOBJECTUIVARBPROC glGetQueryObjectuivARB;
 
 extern PFNGLGETQUERYOBJECTUI64VEXTPROC glGetQueryObjectui64vEXT;
 
-// GL_ARB_point_parameters
-extern PFNGLPOINTPARAMETERFARBPROC glPointParameterfARB;
-extern PFNGLPOINTPARAMETERFVARBPROC glPointParameterfvARB;
-
 // GL_ARB_shader_objects
 extern PFNGLDELETEOBJECTARBPROC glDeleteShader;
 extern PFNGLDELETEOBJECTARBPROC glDeleteProgram;
@@ -370,7 +366,28 @@ extern PFNGLGETDEBUGMESSAGELOGARBPROC glGetDebugMessageLogARB;
 // LL_DARWIN
 
 #include <OpenGL/gl3.h>
+///Shyotl/Bitten note work around missing extensions on mac for OpenGL 3
+#ifndef GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT
+#define GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT 0x8CD9
+#endif
 
+#ifndef GL_FRAMEBUFFER_EXT
+#define GL_FRAMEBUFFER_EXT GL_FRAMEBUFFER
+#endif
+
+#ifndef GL_COMPARE_R_TO_TEXTURE
+#define GL_COMPARE_R_TO_TEXTURE GL_COMPARE_REF_TO_TEXTURE
+#endif
+
+#ifndef GL_OBJECT_ACTIVE_UNIFORMS_ARB
+#define GL_OBJECT_ACTIVE_UNIFORMS_ARB     0x8B86
+#endif
+
+#ifndef GL_MODELVIEW_STACK_DEPTH
+#define GL_MODELVIEW_STACK_DEPTH 0x0BA3
+#endif
+
+///End Shyotl/Bitten Note
 #define GL_EXT_separate_specular_color 1
 #include <OpenGL/gl3ext.h>
 
@@ -379,6 +396,7 @@ extern PFNGLGETDEBUGMESSAGELOGARBPROC glGetDebugMessageLogARB;
 #include <AvailabilityMacros.h>
 
 #define ARB_FN(fn)
+#define glGetQueryObjectui64vEXT glGetQueryObjectui64v;
 #define glUniform1iARB glUniform1i
 #define glUniform1ivARB glUniform1iv
 #define glUniform1fARB glUniform1f
@@ -397,6 +415,7 @@ extern PFNGLGETDEBUGMESSAGELOGARBPROC glGetDebugMessageLogARB;
 #define glGetUniformLocationARB glGetUniformLocation
 #define glBeginQueryARB glBeginQuery
 #define glEndQueryARB glEndQuery
+#define glGenQueriesARB glGenQueries
 #define glDeleteQueriesARB glDeleteQueries
 #define glCreateShaderObjectARB glCreateShader
 #define glShaderSourceARB glShaderSource
@@ -661,7 +680,7 @@ extern void glGetBufferPointervARB (GLenum, GLenum, GLvoid* *);
 }
 #endif
 
-#include <OpenGL/gl.h>
+//#include <OpenGL/gl.h>
 #endif // End OS X OpenGL 3.2 comment block
 
 #endif // LL_MESA / LL_WINDOWS / LL_DARWIN

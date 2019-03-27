@@ -103,7 +103,6 @@ public:
 	S32  mNumTextureImageUnits;
 	BOOL mHasOcclusionQuery;
 	BOOL mHasOcclusionQuery2;
-	BOOL mHasPointParameters;
 	BOOL mHasDrawBuffers;
 	BOOL mHasDepthClamp;
 	BOOL mHasTransformFeedback;
@@ -290,6 +289,10 @@ public:
 	virtual void disable() = 0;
 };
 
+#if LL_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundefined-var-template"
+#endif
 template <LLGLenum state>
 class LLGLState : public LLGLStateIface
 {
@@ -355,6 +358,10 @@ private:
 		}
 	}
 };
+#if LL_CLANG
+# pragma clang diagnostic pop
+#endif
+
 #define initLLGLState(state, value, disabler_ptr) \
 	template <> \
     LLGLStateStaticData LLGLState<state>::staticData = {#state, state, value, 0, nullptr, disabler_ptr}; \
@@ -363,6 +370,7 @@ private:
 template <>
 class LLGLState<0> : public LLGLStateIface
 {
+public:
 	LLGLState(S8 newState = CURRENT_STATE) { }
 	virtual ~LLGLState() { }
 	virtual void enable() { }
@@ -378,6 +386,8 @@ template <LLGLenum state>
 struct LLGLEnable : public LLGLState<state>
 {
 	LLGLEnable(bool noskip = true) : LLGLState<state>(noskip ? TRUE : LLGLState<state>::CURRENT_STATE) {}
+/* needs fixing */
+    //~LLGLDisable() {}
 };
 
 template <LLGLenum state>

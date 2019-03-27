@@ -342,9 +342,10 @@ void LLDrawPoolWLSky::renderDeferred(S32 pass)
 	const F32 camHeightLocal = LLWLParamManager::getInstance()->getDomeOffset() * LLWLParamManager::getInstance()->getDomeRadius();
 
 	LLGLDisable<GL_STENCIL_TEST> stencil;
-	LLGLSNoFog disableFog;
+
 	LLGLDepthTest depth(GL_TRUE, GL_FALSE);
 #ifndef LL_GL_CORE
+        LLGLSNoFog disableFog;
 	LLGLDisable<GL_CLIP_PLANE0> clip;
 #endif
 
